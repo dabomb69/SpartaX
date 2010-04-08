@@ -81,7 +81,7 @@ if ($line =~ /^PING :/) {
 if ($command eq 'PRIVMSG') {
 	
 	
-if (lc($mtext) eq "stats") {
+if (lc($mtext) eq "\?stats") {
   local $stats = "no stats available";
   foreach $_ (`ps u $$ | awk '{print "I am using "\$3"% of cpu and "\$4"% of mem I was started at "\$9" my pid is "\$2" i was run by "\$1}'`) {
     $stats = $_;
