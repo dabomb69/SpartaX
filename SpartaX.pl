@@ -38,6 +38,7 @@ $nl = $nl . chr(10);
 
 $lastpong = time();
 $msgto = $channel;
+snd("CAP LS");
 
 snd ("USER $botname $botemail $botname :SpartaX");
 
