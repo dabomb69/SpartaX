@@ -85,6 +85,9 @@ $mtext =~ s/[\r|\n]//g;
   print "CMND: $command\n";
   print "USER: $usermode\n\n";
 
+if ($command =/^90(3|4|5|6|7|8|9|.*)/ {
+	&saslend;
+
 if ($line =~ /^PING :/) {
   $lastpong = time();
   snd ("PONG :" . substr($line,index($line,":")+1));
