@@ -74,6 +74,13 @@ $mtext = substr($line,index($line,":",index($line,":")+1)+1);
 
 $mtext =~ s/[\r|\n]//g;
 
+  print "RAW : $line\n\n";
+  print "TEXT: $mtext\n";
+  print "MSG2: $msgto\n";
+  print "NICK: $nickname ($hostmask)\n";
+  print "CMND: $command\n";
+  print "USER: $usermode\n\n";
+
 if ($line =~ /^PING :/) {
   $lastpong = time();
   snd ("PONG :" . substr($line,index($line,":")+1));
