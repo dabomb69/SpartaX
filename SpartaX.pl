@@ -97,3 +97,4 @@ if (lc($mtext) eq "\?stats") {
     }
   }
 }
+}
