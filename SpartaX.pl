@@ -42,7 +42,7 @@ my $nickname = 'Karmic';
 
  POE::Session->create(
      package_states => [
-         main => [ qw(_default _start irc_001) ],
+         main => [ qw(_default _start irc_001 irc_public) ],
      ],
      heap => { irc => $irc },
  );
@@ -78,7 +78,22 @@ my $nickname = 'Karmic';
      return;
  }
 
+sub irc_public {
+ my ($kernel,$sender,$state,$who,$where,$what) = @_[KERNEL,SENDER,STATE,ARG0,ARG1,ARG2];
+ my ($nick, $user, $mask) = ( split /!|@/, $who );
+ my $channel = $where->[0];
+ print($what);
 
+	if ($what =~ /^\?stats/) {
+	  #my $stats = "no stats available";
+  foreach $_ (`ps u $$ | awk '{print "I am using "\$3"% of cpu and "\$4"% of mem I was started at "\$9" my pid is "\$2" i was run by "\$1}'`) {
+   my $stats = my($foo);
+   print($foo);
+  }
+  $kernel->post( $sender => privmsg => $channel => my($stats) );
+}
+return;
+}
  # We registered for all events, this will produce some debug info.
  sub _default {
      my ($event, $args) = @_[ARG0 .. $#_];
@@ -92,6 +107,6 @@ my $nickname = 'Karmic';
              push ( @output, "'$arg'" );
          }
      }
-     print join ' ', @output, "\n";
+    # print join ' ', @output, "\n";
      return 0;
  }
