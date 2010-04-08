@@ -9,6 +9,14 @@ sub snd {
   return;
 }
 
+sub sndtxt {
+  my ($i) = 0;
+  my ($txt) = @_;
+  my ($ch) = 0;
+  if ($verbose eq "medium") {
+    print "<${botname}> $txt\n";
+  }
+}
 
 
 print "Connecting to server...   ";
@@ -69,6 +77,19 @@ $mtext =~ s/[\r|\n]//g;
 if ($line =~ /^PING :/) {
   $lastpong = time();
   snd ("PONG :" . substr($line,index($line,":")+1));
+
+if ($command eq 'PRIVMSG') {
+	
+	
+if (lc($mtext) eq "stats") {
+  local $stats = "no stats available";
+  foreach $_ (`ps u $$ | awk '{print "I am using "\$3"% of cpu and "\$4"% of mem I was started at "\$9" my pid is "\$2" i was run by "\$1}'`) {
+    $stats = $_;
+  }
+  sndtxt($stats);
+  next;
+}
+}
 
   foreach $iponly ( keys (%ignore )) {
     if (($ignore{$iponly} - time) <= 0) {
