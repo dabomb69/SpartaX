@@ -19,7 +19,10 @@ sub sndtxt {
 }
 
 
+print "Reading config...	";
+do "./bot.conf";
 print "Connecting to server...   ";
+#FAIL!
 $remote = $server;
 $port = $serverport;
 if ($port =~ /\D/) { $port = getservbyname($port, 'tcp') }
