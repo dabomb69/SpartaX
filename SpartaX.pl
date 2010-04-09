@@ -121,23 +121,26 @@ open (CONNLOG, ">>\.\/logs\/connection.log") or die "$mfail can't output to logf
 open (SASLOG, ">>\.\/logs\/sasl.log") or die "$mfail can't output to logfile: $!\n";#Open the SASL log
 
 print "Connecting to server...   \n";
-#FAIL!
-$remote = $server;
-$port = $serverport;
+$remote = $server; #<--Why did I need to do that?
+$port = $serverport;#<--Same as above...?
 print("Connecting to ".$remote.":".$port);
+#Wee, time for some FUN socket crap! :p (Note, I should really clean this up to use IO::Socket or something...)
 if ($port =~ /\D/) { $port = getservbyname($port, 'tcp') }
-$iaddr = inet_aton($remote) or die "$mfail (invalid host: $remote)\n";
+$iaddr = inet_aton($remote) or die "$mfail (invalid host: $remote)\n"; #Crap, that doesn't exist, WAT DO?
 $paddr = sockaddr_in($port,$iaddr);
 $proto = getprotobyname('tcp');
-socket (SOCK,PF_INET,SOCK_STREAM,$proto) or die "$mfail (socket error: $!)\n";
-connect (SOCK, $paddr) or die "$mfail (connect error: $!)\n";
-print "$mok (connected to ${server}:${serverport})\n";
+socket (SOCK,PF_INET,SOCK_STREAM,$proto) or die "$mfail (socket error: $!)\n"; #Crap, something broke our socket, WAT DO?
+connect (SOCK, $paddr) or die "$mfail (connect error: $!)\n"; #Meh, something else is broke, DIIIIIE!
+print "$mok (connected to ${server}:${serverport})\n"; #Oh... yay. We actually connected.
 
-$nl = chr(13);
-$nl = $nl . chr(10);
+$nl = chr(13); #Ok, I've got no clue what this is fore.
+$nl = $nl . chr(10);#Same.
 
-$lastpong = time();
-$msgto = $channel;
+$msgto = $channel; #Who/what's stuff going to?
+
+###############################
+#SEND CAP LS (START SASL AUTH)#
+###############################
 snd("CAP LS");
 
 ######################
