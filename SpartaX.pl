@@ -240,12 +240,14 @@ if (uc($line) =~ /AUTHENTICATE /) {
 
 if ($command eq 903) {
 	logline('SASLOG', "SASL Authentication successful, connecting to IRC.");
+	snd ("CAP END");
 	snd ("USER $botname SpartaX SpartaX :SpartaX");
 	snd ("NICK $botname");
 }
 
 if ($command eq 904) {
 	logline('SASLOG', "SASL Authentication failed, disconnecting from IRC.");
+	snd("CAP END");
 	snd("QUIT :SASL failed");
 	&Cleanup;
 	die;
