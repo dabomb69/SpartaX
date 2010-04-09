@@ -243,6 +243,8 @@ if ($command eq 903) {
 	snd ("CAP END");
 	snd ("USER $botname SpartaX SpartaX :SpartaX");
 	snd ("NICK $botname");
+	sleep 3;
+	&JoinChans;
 }
 
 if ($command eq 904) {
@@ -253,7 +255,7 @@ if ($command eq 904) {
 	die;
 }
 
-if ($command eq 001) {
+sub JoinChans {
 	foreach $channel (@channels) {
 		snd("JOIN $channel");
 	}
