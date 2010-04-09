@@ -189,7 +189,8 @@ $mtext =~ s/[\r|\n]//g;
 #:bartol.freenode.net CAP * LS :identify-msg multi-prefix sasl
 
 	$tosend = '';
-	if ($command eq 'CAP') {
+	if ($command eq 'CAP') { #Ok, now for some /fun/ crap. :D
+	#Starting off, did the server send the command CAP? If so, read down.
 		if ($line =~ / LS /) {
 			$tosend .= ' multi-prefix' if $line =~ /multi-prefix/i;
 			$tosend .= ' sasl' if $line =~ /sasl/i; # && defined($sasl_auth{$server->{tag}})
