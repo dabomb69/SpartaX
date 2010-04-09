@@ -191,11 +191,11 @@ $mtext =~ s/[\r|\n]//g;
 	$tosend = '';
 	if ($command eq 'CAP') { #Ok, now for some /fun/ crap. :D
 	#Starting off, did the server send the command CAP? If so, read down.
-		if ($line =~ / LS /) {
+		if ($line =~ / LS /) { #Did it do CAP LS or something similar?
 			$tosend .= ' multi-prefix' if $line =~ /multi-prefix/i;
-			$tosend .= ' sasl' if $line =~ /sasl/i; # && defined($sasl_auth{$server->{tag}})
+			$tosend .= ' sasl' if $line =~ /sasl/i; #Does it /support/ sasl?
 			$tosend =~ s/^ //;
-			logline("SASLOG", "CLICAP: supported by server:$mtext");
+			logline("SASLOG", "CLICAP: supported by server:$mtext"); #Log report! <3
 				if ($tosend eq '') {
 					snd("CAP END");
 				} else {
@@ -204,7 +204,7 @@ $mtext =~ s/[\r|\n]//g;
 				}
 		} elsif ($line =~ / ACK /) {
 			logline('SASLOG', "CLICAP: now enabled:$mtext");
-			if ($mtext =~ / sasl /i) {
+			if ($mtext =~ /sasl/i) {
 				snd("AUTHENTICATE PLAIN");
 			}
 		} elsif ($line =~ / NAK /) {
@@ -216,6 +216,7 @@ $mtext =~ s/[\r|\n]//g;
 		}
 	}
 	
+#OK, see ./docs/sasl.txt or something for more info, documenting this crap within the code will be a pita.
 if (uc($line) =~ /AUTHENTICATE /) {
 	logline('SASLOG', "AUTHENTICATE: Starting SASL Authentication");
 	$u = $sasl_user;
