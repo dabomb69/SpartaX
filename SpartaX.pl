@@ -23,6 +23,7 @@ use Socket;
 use POSIX ":sys_wait_h";
 use MIME::Base64;
 
+#Wee, lines 26 - 75 are just telling Perl what to do if we get a SIGINT or SIGHUP or something like that. :p
 sub REAPER {
   my $waitedpid;
   $waitedpid = wait;
@@ -72,6 +73,7 @@ $SIG{ALRM} = \&ALARM_handler;
 $SIG{CHLD} = \&REAPER;
 $SIG{HUP} = \&HUP_handler;
 
+#Wee, establishing Terminal colors. :p
 if (lc($^O) eq 'mswin32') {
   $win321 = '';
   $mfail = "[FAILED]";
@@ -99,16 +101,11 @@ sub sndtxt {
 }
 
 sub Cleanup {
-  close (SASLOG);
-  close (CONNLOG);
-  close (CHATLOG);
-  #dbmclose (%access);
-  #dbmclose (%servers);
-  #dbmclose (%ignore);
-  #dbmclose (%seen);
-  #dbmclose (%profiles);
-  #dbmclose (%hosts);
-  close (SOCK);
+#What to do when the bot goes kersplat and needs to close.
+  close (SASLOG); #SASL Log
+  close (CONNLOG);# Connection Log
+  close (CHATLOG);#Chat log
+  close (SOCK);#Connection to IRC
 }
 
 sub logline {
@@ -119,9 +116,9 @@ sub logline {
 print "Reading config...	\n";
 do "./bot.conf";
 print "Opening log files...		\n";
-open (CHATLOG, ">>\.\/logs\/$botname.log") or die "$mfail can't output to logfile: $!\n";
-open (CONNLOG, ">>\.\/logs\/connection.log") or die "$mfail can't output to logfile: $!\n";
-open (SASLOG, ">>\.\/logs\/sasl.log") or die "$mfail can't output to logfile: $!\n";
+open (CHATLOG, ">>\.\/logs\/$botname.log") or die "$mfail can't output to logfile: $!\n";#Open the chatlog
+open (CONNLOG, ">>\.\/logs\/connection.log") or die "$mfail can't output to logfile: $!\n";#Open the Connection log
+open (SASLOG, ">>\.\/logs\/sasl.log") or die "$mfail can't output to logfile: $!\n";#Open the SASL log
 
 print "Connecting to server...   \n";
 #FAIL!
