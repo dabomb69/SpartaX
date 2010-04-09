@@ -21,6 +21,7 @@
 
 use Socket;
 use POSIX ":sys_wait_h";
+use MIME::Base64;
 
 sub REAPER {
   my $waitedpid;
@@ -142,11 +143,6 @@ $lastpong = time();
 $msgto = $channel;
 snd("CAP LS");
 
-snd ("USER $botname SpartaX SpartaX :SpartaX");
-
-snd ("NICK $botname");
-
-
 ######################
 #####################
 ####################
@@ -220,11 +216,42 @@ $mtext =~ s/[\r|\n]//g;
 	}
 	
 if (uc($line) =~ /AUTHENTICATE /) {
-	print("Ohai, duz this work?");
+	logline('SASLOG', "AUTHENTICATE: Starting SASL Authentication");
+	$u = $sasl_user;
+	$p = $sasl_passwd;
+	$out = join("\0", $u, $u, $p);
+	$out = encode_base64($out, "");
+	
+		if(length $out == 0) {
+		snd("AUTHENTICATE +");
+		return;
+	}else{
+		while(length $out >= 400) {
+			$subout = substr($out, 0, 400, '');
+			snd("AUTHENTICATE $subout");
+		}
+		if(length $out) {
+			snd("AUTHENTICATE $out");
+		}else{ # Last piece was exactly 400 bytes, we have to send some padding to indicate we're done
+			snd("AUTHENTICATE +");
+		}
+	}
 }
 
+if ($command eq 903) {
+	logline('SASLOG', "SASL Authentication successful, connecting to IRC.");
+	snd ("USER $botname SpartaX SpartaX :SpartaX");
+	snd ("NICK $botname");
+}
 
-if ($command eq '001') {
+if ($command eq 904) {
+	logline('SASLOG', "SASL Authentication failed, disconnecting from IRC.");
+	snd("QUIT :SASL failed");
+	&Cleanup;
+	die;
+}
+
+if ($command eq 001) {
 	foreach $channel (@channels) {
 		snd("JOIN $channel");
 	}
