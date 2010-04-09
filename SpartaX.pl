@@ -218,6 +218,10 @@ $mtext =~ s/[\r|\n]//g;
 			logline('SASLOG', "CLICAP: currently enabled:$mtext");
 		}
 	}
+	
+if (uc($line) =~ /AUTHENTICATE /) {
+	print("Ohai, duz this work?");
+}
 
 
 if ($command eq '001') {
