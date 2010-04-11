@@ -257,15 +257,11 @@ if ($command eq 904) {
 	die;
 }
 
-if ($command eq 001) {
-	JoinChans;
-}
-
-sub JoinChans {
+if ($command eq '001') {
 	logline('CONNLOG'. 'Joining channels - More info in CHATLOG');
 	foreach $channel (@channels) {
-		snd("JOIN $channel");
-		logline('CHATLOG', 'Joining $channel');
+	snd("JOIN $channel");
+	logline('CHATLOG', 'Joining $channel');
 	}
 }
 
