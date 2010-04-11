@@ -98,6 +98,7 @@ sub sndtxt {
   my ($txt) = @_;
   my ($ch) = 0;
   print "<${botname}> $txt\n";
+  snd("NOTICE $channel :$txt");
 }
 
 sub Cleanup {
@@ -142,6 +143,8 @@ $msgto = $channel; #Who/what's stuff going to?
 #SEND CAP LS (START SASL AUTH)#
 ###############################
 snd("CAP LS");
+snd ("NICK $botname");
+snd ("USER $botname SpartaX SpartaX :SpartaX");
 
 ######################
 #####################
@@ -243,10 +246,7 @@ if (uc($line) =~ /AUTHENTICATE /) {
 if ($command eq 903) {
 	logline('SASLOG', "SASL Authentication successful, connecting to IRC.");
 	snd ("CAP END");
-	snd ("USER $botname SpartaX SpartaX :SpartaX");
-	snd ("NICK $botname");
-	sleep 3;
-	&JoinChans;
+
 }
 
 if ($command eq 904) {
@@ -257,9 +257,15 @@ if ($command eq 904) {
 	die;
 }
 
+if ($command eq 001) {
+	JoinChans;
+}
+
 sub JoinChans {
+	logline('CONNLOG'. 'Joining channels - More info in CHATLOG');
 	foreach $channel (@channels) {
 		snd("JOIN $channel");
+		logline('CHATLOG', 'Joining $channel');
 	}
 }
 
