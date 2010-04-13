@@ -106,6 +106,7 @@ sub Cleanup {
   close (SASLOG); #SASL Log
   close (CONNLOG);# Connection Log
   close (CHATLOG);#Chat log
+  close (STATUS);#Close status log
   close (SOCK);#Connection to IRC
 }
 
@@ -120,8 +121,31 @@ print "Opening log files...		\n";
 open (CHATLOG, ">>\.\/logs\/$botname.log") or die "$mfail can't output to logfile: $!\n";#Open the chatlog
 open (CONNLOG, ">>\.\/logs\/connection.log") or die "$mfail can't output to logfile: $!\n";#Open the Connection log
 open (SASLOG, ">>\.\/logs\/sasl.log") or die "$mfail can't output to logfile: $!\n";#Open the SASL log
+open (STATUS, ">>\.\/logs\/status.log") or die "$mfail can't output to logfile: $!\n";#Open the SASL log
 
 print "Connecting to server...   \n";
+if ($srv) {
+	  use Net::DNS;
+  use Net::DNS::Resolver;
+  use Net::DNS::RR;
+  my $res   = Net::DNS::Resolver->new;
+  my $query = $res->query("_irc._tcp.".$srvserv, "SRV");
+  
+  if ($query) {
+      foreach $rr (grep { $_->type eq 'SRV' } $query->answer) {
+           #print "priority = ", $rr->priority, "\n";
+           #print "weight = ", $rr->weight, "\n";
+           #print "port = ", $rr->port, "\n";
+           #print "target = ", $rr->target, "\n";
+		$port=$rr->port;
+		$server=$rr->target;
+      }
+  }
+  else {
+     warn "query failed: ", $res->errorstring, "\n";
+ }
+logline('CONNLOG', "Using SRV records, connecting to $server on port $port");
+}
 $remote = $server; #<--Why did I need to do that?
 $port = $serverport;#<--Same as above...?
 print("Connecting to ".$remote.":".$port);
@@ -134,7 +158,7 @@ socket (SOCK,PF_INET,SOCK_STREAM,$proto) or die "$mfail (socket error: $!)\n"; #
 connect (SOCK, $paddr) or die "$mfail (connect error: $!)\n"; #Meh, something else is broke, DIIIIIE!
 print "$mok (connected to ${server}:${serverport})\n"; #Oh... yay. We actually connected.
 
-$nl = chr(13); #Ok, I've got no clue what this is fore.
+$nl = chr(13); #Ok, I've got no clue what this is for.
 $nl = $nl . chr(10);#Same.
 
 $msgto = $channel; #Who/what's stuff going to?
@@ -258,11 +282,24 @@ if ($command eq 904) {
 }
 
 if ($command eq '001') {
-	logline('CONNLOG'. 'Joining channels - More info in CHATLOG');
+	logline('CONNLOG'. 'Joining channels - More info in status.log');
 	foreach $channel (@channels) {
 	snd("JOIN $channel");
-	logline('CHATLOG', 'Joining $channel');
+	logline('STATUS', "Joining $channel");
 	}
+}
+
+if ($command eq 'INVITE') {
+	snd("JOIN $mtext");
+	logline('STATUS', "Invited to $mtext by $nickname - Joining");
+}
+
+if ($command eq 473) {
+	@tmp=split(/ /,$line);
+	logline('STATUS', "Cannot join $tmp[3] - Invite only");
+	logline('STATUS', "Attempting to send KNOCK to $tmp[3]");
+	snd("KNOCK $tmp[3]");
+	undef @tmp;
 }
 
 if ($line =~ /^PING :/) {
