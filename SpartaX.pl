@@ -22,8 +22,12 @@
 use Socket;
 use POSIX ":sys_wait_h";
 use MIME::Base64;
+use Modules::X;
+use Modules::Rhythmbox;
 
 #Wee, lines 26 - 75 are just telling Perl what to do if we get a SIGINT or SIGHUP or something like that. :p
+#$X::cmd{"np_init"}->();
+Rhythmbox::Init;
 sub REAPER {
   my $waitedpid;
   $waitedpid = wait;
@@ -115,6 +119,8 @@ sub logline {
 	print $logfile time() . " $log\n";
 }
 
+
+
 print "Reading config...	\n";
 do "./bot.conf";
 print "Opening log files...		\n";
@@ -197,6 +203,8 @@ $hostmask = substr($line,index($line,":"));
 $mtext = substr($line,index($line,":",index($line,":")+1)+1);
 ($hostmask, $command) = split(" ",substr($line,index($line,":")+1));
 ($nickname) = split("!",$hostmask);
+@tmp=split(/ /, $line);$msgto=$tmp[2];$channel=$msgto;undef(@tmp);
+
 
 @spacesplit = split(" ",$line);
 
@@ -305,24 +313,30 @@ if ($command eq 473) {
 if ($line =~ /^PING :/) {
   $lastpong = time();
   snd ("PONG :" . substr($line,index($line,":")+1));
+}
 
 if ($command eq 'PRIVMSG') {
 	
-	
-if (lc($mtext) eq "\?stats") {
-  local $stats = "no stats available";
-  foreach $_ (`ps u $$ | awk '{print "I am using "\$3"% of cpu and "\$4"% of mem I was started at "\$9" my pid is "\$2" i was run by "\$1}'`) {
-    $stats = $_;
-  }
-  sndtxt($stats);
-  next;
-}
+if ($mtext =~ /^($botname(,|:) |\?)np/) {
+	 ($httpd, $req) = @_;
+        if (`ps -C rhythmbox` =~ /rhythmbox/) {
+		# Check if rhythmbox streams music
+		$title = `rhythmbox-client --print-playing-format %st`;
+		if (length $title > 1) {
+			$title = `rhythmbox-client --print-playing-format %st\\ -\\ %tt`;
+		} else {
+			$title = `rhythmbox-client --print-playing-format %ta\\ -\\ %at\\ -\\ %tt\\ -\\ "(%te/%td)"`;
+		}
+		chop $title;
+		$np="Chazz is currently listening to: " . $title;
+	} else {
+		$np="Rhythmbox is not running.";
+	}
+	snd("PRIVMSG $msgto :$np");
 }
 
-  foreach $iponly ( keys (%ignore )) {
-    if (($ignore{$iponly} - time) <= 0) {
-      delete $ignore{$iponly};
-    }
-  }
+
+
 }
+
 }
